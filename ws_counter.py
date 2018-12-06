@@ -40,7 +40,7 @@ class PlexWebSocketReader(Thread):
 
 if __name__ == "__main__":
     reader = PlexWebSocketReader()
-    influx = InfluxDBClient(vars['INFLUXDB_URL'], int(vars['INFLUXDB_PORT']), 'root', 'root', vars['INFLUXDB_DBNAME'])
+    influx = InfluxDBClient(vars['INFLUXDB_URL'], int(vars['INFLUXDB_PORT']), vars['INFLUXDB_USER'], vars['INFLUXDB_PASSWORD'], vars['INFLUXDB_DBNAME'])
     while True:
         sleep(poll_increment)
         avg_requests_per_second = reader.counter / poll_increment
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
         influx_payload = [
             {
-                "measurement": "Plex Info",
+                "measurement": 'Plex',
                 "tags": {
                     "host": socket.gethostname(),
                 },
