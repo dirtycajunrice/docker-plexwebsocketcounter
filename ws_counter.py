@@ -50,7 +50,7 @@ if __name__ == "__main__":
             {
                 "measurement": 'Plex',
                 "tags": {
-                    "host": socket.gethostname(),
+                    "host": plex,
                 },
                 "time": datetime.now(timezone.utc).astimezone().isoformat(),
                 "fields": {
