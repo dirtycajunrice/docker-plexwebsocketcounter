@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-VERSION="$(grep -i version ./ws_counter.py | cut -d' ' -f3)"
+VERSION="$(grep -i version ./ws_counter.py | cut -d' ' -f3 | tr -d \")"
 
 # Docker
 GITHUB_USER='dirtycajunrice'

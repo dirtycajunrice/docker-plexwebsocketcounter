@@ -2,14 +2,14 @@ FROM arm32v6/python:3.7.2-alpine
 
 MAINTAINER dirtycajunrice
 
+# Copy the current directory contents into the container at /app
+COPY /requirements.txt /app
+COPY /ws_counter.py /app
+
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY requirements.txt .
-COPY ws_counter.py .
-
 # Install any needed packages specified in requirements.txt
-RUN pip install -r requirements.txt
+RUN python3 -m pip install -r /app/requirements.txt
 
 # Define environment variable
 ENV INFLUXDB_DBNAME plex
