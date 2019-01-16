@@ -31,7 +31,7 @@ docker tag "${NAMESPACE}:latest" "${NAMESPACE}:latest-amd64" && \
 docker push "${NAMESPACE}:latest-amd64"
 
 # Prepare qemu for ARM builds
-#docker run --rm --privileged multiarch/qemu-user-static:register --reset
+docker run --rm --privileged multiarch/qemu-user-static:register --reset
 
 # ARM images
 for i in $(ls *arm*); do
