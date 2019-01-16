@@ -9,7 +9,7 @@ COPY requirements.txt .
 COPY ws_counter.py .
 
 # Install any needed packages specified in requirements.txt
-RUN pip install -r requirements.txt
+#RUN pip install -r requirements.txt
 
 # Define environment variable
 ENV INFLUXDB_DBNAME plex
