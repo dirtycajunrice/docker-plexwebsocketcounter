@@ -37,7 +37,7 @@ docker push "${NAMESPACE}:latest-amd64"
 for i in $(ls *arm*); do
   arch="$(echo ${i} | cut -d. -f2)"
   # Latest
-  docker build -f "./Dockerfile-${arch}" -t "${NAMESPACE}:latest-${arch}" . && \
+  docker build -f "./Dockerfile.${arch}" -t "${NAMESPACE}:latest-${arch}" . && \
   docker push "${NAMESPACE}:latest-${arch}" && \
   # Versioned
   docker tag "${NAMESPACE}:latest-${arch}" "${NAMESPACE}:${VERSION}-${arch}" && \
