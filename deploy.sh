@@ -18,7 +18,7 @@ sudo service docker restart
 echo $DOCKER_PASSWORD | docker login -u="$DOCKER_USER" --password-stdin
 
 # Register qemu binary
-docker run --rm --privileged multiarch/qemu-user-static:register
+#docker run --rm --privileged multiarch/qemu-user-static:register
 
 # Latest x64
 docker build -t "${NAMESPACE}:latest" . && \
