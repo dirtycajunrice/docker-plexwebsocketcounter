@@ -1,11 +1,11 @@
 import os
-import socket
 import websocket
 from time import sleep
 from threading import Thread
 from influxdb import InfluxDBClient
 from datetime import datetime, timezone
 
+VERSION = "1.0.1"
 vars = os.environ
 
 poll_increment = int(vars['POLL_INCREMENT'])
