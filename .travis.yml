@@ -12,6 +12,10 @@ addons:
 
 deploy:
   - provider: script
-    script: bash ./deploy.sh
+    script: bash deploy.sh
     on:
       branch: master
+  - provider: script
+    script: bash deploy.sh
+    on:
+      branch: develop
