@@ -1,10 +1,10 @@
 FROM amd64/python:3.7.2-alpine
 
-MAINTAINER dirtycajunrice
+LABEL maintainer="dirtycajunrice"
 
 WORKDIR /app
 
-COPY / /app
+COPY /ws_counter.py /requirements.txt /README.md /app/
 
 RUN python3 -m pip install -r /app/requirements.txt
 
