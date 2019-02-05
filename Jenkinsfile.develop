@@ -33,7 +33,7 @@ pipeline {
             when { branch 'develop' }
             agent { node 'x86Node1'}
             steps {
-                sh(script: 'docker manifest create "${REPOSITORY}:develop ${REPOSITORY}:develop-amd64 ${REPOSITORY}:develop-arm64 ${REPOSITORY}:develop-arm"')
+                sh(script: 'docker manifest create ${REPOSITORY}:develop ${REPOSITORY}:develop-amd64 ${REPOSITORY}:develop-arm64 ${REPOSITORY}:develop-arm')
             }
         }
     }
