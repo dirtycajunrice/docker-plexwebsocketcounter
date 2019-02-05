@@ -39,10 +39,10 @@ pipeline {
                     def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \"').trim()
                     sh(script: 'docker manifest create ${REPOSITORY}:${tag} ${REPOSITORY}:${tag}-amd64 ${REPOSITORY}:${tag}-arm64 ${REPOSITORY}:${tag}-arm')
                     sh(script: 'docker manifest inspect ${REPOSITORY}:${tag}')
-                    sh(script: 'docker manifest push ${REPOSITORY}:${tag}')
+                    sh(script: 'docker manifest push -p ${REPOSITORY}:${tag}')
                     sh(script: 'docker manifest create ${REPOSITORY}:latest ${REPOSITORY}:latest-amd64 ${REPOSITORY}:latest-arm64 ${REPOSITORY}:latest-arm')
                     sh(script: 'docker manifest inspect ${REPOSITORY}:latest')
-                    sh(script: 'docker manifest push ${REPOSITORY}:latest')
+                    sh(script: 'docker manifest push -p ${REPOSITORY}:latest')
                 }
             }
         }
@@ -77,7 +77,7 @@ pipeline {
             steps {
                 sh(script: 'docker manifest create ${REPOSITORY}:develop ${REPOSITORY}:develop-amd64 ${REPOSITORY}:develop-arm64 ${REPOSITORY}:develop-arm')
                 sh(script: 'docker manifest inspect ${REPOSITORY}:develop')
-                sh(script: 'docker manifest push ${REPOSITORY}:develop')
+                sh(script: 'docker manifest push -p ${REPOSITORY}:develop')
             }
         }
     }
