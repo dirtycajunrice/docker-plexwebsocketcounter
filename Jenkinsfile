@@ -22,8 +22,8 @@ pipeline {
             steps {
                 script {
                     def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \"').trim()
-                    def armimage = docker.build("${REPOSITORY}:${tag}-arm", "-f Dockerfile.arm")
-                    def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64")
+                    def armimage = docker.build("${REPOSITORY}:${tag}-arm", "-f Dockerfile.arm .")
+                    def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64 .")
                     armimage.push()
                     arm64image.push()
                     armimage.push("latest-arm")
@@ -58,8 +58,8 @@ pipeline {
             agent { node 'CajunARM64'}
             steps {
                 script {
-                    def armimage = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm")
-                    def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64")
+                    def armimage = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
+                    def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
                     armimage.push()
                     arm64image.push()
                     armimage.push("develop-arm")
