@@ -5,7 +5,7 @@ pipeline {
     }
     stages {
         stage('Master x86') {
-            when { branch 'refs/remotes/origin/master' }
+            when { branch 'master' }
             agent { node 'x86Node1'}
             steps {
                 script {
@@ -17,7 +17,7 @@ pipeline {
             }
         }
         stage('Master ARM') {
-            when { branch 'refs/remotes/origin/master' }
+            when { branch 'master' }
             agent { node 'CajunARM64'}
             steps {
                 script {
@@ -32,7 +32,7 @@ pipeline {
             }
         }
         stage('Master Manifest') {
-            when { branch 'refs/remotes/origin/master' }
+            when { branch 'master' }
             agent { node 'x86Node1'}
             steps {
                 script {
