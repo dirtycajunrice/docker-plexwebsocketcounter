@@ -5,11 +5,12 @@ from threading import Thread
 from influxdb import InfluxDBClient
 from datetime import datetime, timezone
 
-VERSION = "1.0.1"
+VERSION = "1.1.0"
 vars = os.environ
 
 poll_increment = int(vars['POLL_INCREMENT'])
 plex_ws = 'ws://{}/:/websockets/notifications'.format(vars['PLEX_URL'])
+
 
 class PlexWebSocketReader(Thread):
     header = ['X-Plex-Token: {token}'.format(token=vars['PLEX_TOKEN'])]
