@@ -1,0 +1,40 @@
+pipeline {
+    agent none
+    environment {
+        REPOSITORY = "dirtycajunrice/plexwebsocketcounter"
+    }
+    stages {
+        stage('Develop x86') {
+            when { branch 'develop' }
+            agent { node 'x86Node1'}
+            steps {
+                script {
+                    def image = docker.build("${REPOSITORY}:develop-amd64")
+                    image.push()
+                    image.push("develop-amd64")
+                }
+            }
+        }
+        stage('Develop ARM') {
+            when { branch 'develop' }
+            agent { node 'CajunARM64'}
+            steps {
+                script {
+                    def armimage = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
+                    def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
+                    armimage.push()
+                    arm64image.push()
+                    armimage.push("develop-arm")
+                    arm64image.push("develop-arm64")
+                }
+            }
+        }
+        stage('Develop Manifest') {
+            when { branch 'develop' }
+            agent { node 'x86Node1'}
+            steps {
+                sh(script: 'docker manifest create "${REPOSITORY}:develop ${REPOSITORY}:develop-amd64 ${REPOSITORY}:develop-arm64 ${REPOSITORY}:develop-arm"')
+            }
+        }
+    }
+}
