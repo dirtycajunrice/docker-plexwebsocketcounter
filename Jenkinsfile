@@ -77,7 +77,7 @@ pipeline {
             agent { node 'x86Node1'}
             steps {
                 checkout scm
-                docker manifest create "${REPOSITORY}:develop ${REPOSITORY}:develop-amd64 ${REPOSITORY}:develop-arm64 ${REPOSITORY}:develop-arm"
+                sh(script: 'docker manifest create "${REPOSITORY}:develop ${REPOSITORY}:develop-amd64 ${REPOSITORY}:develop-arm64 ${REPOSITORY}:develop-arm"')
             }
         }
     }
