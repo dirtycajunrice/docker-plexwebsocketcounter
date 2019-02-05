@@ -1,4 +1,4 @@
-node {
+node('x86Node1') {
     def app
 
     stage('Clone repository') {
