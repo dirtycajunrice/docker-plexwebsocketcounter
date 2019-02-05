@@ -15,7 +15,7 @@ pipeline {
             steps {
                 script {
                     if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \"').trim()
+                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
                         def image = docker.build("${REPOSITORY}:${tag}-amd64")
                         image.push()
                         image.push("latest-amd64")
@@ -37,7 +37,7 @@ pipeline {
             steps {
                 script {
                     if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \"').trim()
+                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
                         def armimage = docker.build("${REPOSITORY}:${tag}-arm", "-f Dockerfile.arm .")
                         def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64 .")
                         armimage.push()
@@ -64,7 +64,7 @@ pipeline {
             steps {
                 script {
                     if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \"').trim()
+                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
                         sh(script: 'docker manifest create ${REPOSITORY}:${tag} ${REPOSITORY}:${tag}-amd64 ${REPOSITORY}:${tag}-arm64 ${REPOSITORY}:${tag}-arm')
                         sh(script: 'docker manifest inspect ${REPOSITORY}:${tag}')
                         sh(script: 'docker manifest push -p ${REPOSITORY}:${tag}')
