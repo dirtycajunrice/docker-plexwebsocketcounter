@@ -7,8 +7,10 @@ pipeline {
         stage('Flake8') {
             agent { node 'x86Node1'}
             steps {
-                python3 -m venv ouro-venv && ouro-venv/bin/python -m flake8 --max-line-length 120 *.py
-                rm -rf ouro-venv/
+                sh '''
+                    python3 -m venv ouro-venv && ouro-venv/bin/python -m flake8 --max-line-length 120 *.py
+                    rm -rf ouro-venv/
+                '''
             }
         }
         stage('Docker Builds') {
