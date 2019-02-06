@@ -6,6 +6,7 @@ pipeline {
         VERSION_FILE = "ws_counter.py"
         FLAKE_FILES = "ws_counter.py"
         TAG = ""
+        GIT_TOKEN = credentials('github-jenkins-token')
     }
     stages {
         stage('Flake8') {
@@ -113,7 +114,6 @@ pipeline {
         stage('GitHub Release') {
             when { branch 'master' }
             agent { label 'amd64'}
-            environment { GIT_TOKEN = credentials('github-jenkins-token')}
             steps {
                 sh '''
                     git remote set-url origin "https://${GIT_TOKEN_USR}:${GIT_TOKEN_PSW}@github.com/${GIT_REPO}.git" 
