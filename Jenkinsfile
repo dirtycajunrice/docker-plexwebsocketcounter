@@ -12,10 +12,10 @@ pipeline {
         stage('Flake8') {
             agent { label 'amd64'}
             steps {
-                sh '''
+                sh """
                     python3 -m venv venv && venv/bin/pip install flake8 && venv/bin/python -m flake8 --max-line-length 120 ${FLAKE_FILES}
                     rm -rf venv/
-                '''
+                """
                 script {
                     TAG = sh(returnStdout: true, script: 'grep -i version ${VERSION_FILE} | cut -d" " -f3 | tr -d \\"').trim()
                 }
