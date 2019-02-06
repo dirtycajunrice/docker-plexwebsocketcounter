@@ -4,51 +4,55 @@ pipeline {
         REPOSITORY = "dirtycajunrice/plexwebsocketcounter"
     }
     stages {
-        stage('Docker x86 Build') {
-            when {
-                anyOf {
-                    branch 'master'
-                    branch 'develop'
-                }
-            }
-            agent { node 'x86Node1'}
-            steps {
-                script {
-                    if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
-                        def image = docker.build("${REPOSITORY}:${tag}-amd64")
-                        image.push()
-                        image.push("latest-amd64")
-                    } else if (BRANCH_NAME == 'develop') {
-                        def image = docker.build("${REPOSITORY}:develop-amd64")
-                        image.push()
+        stage('Docker Builds') {
+            parallel {
+                stage('x86') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            branch 'develop'
+                        }
+                    }
+                    agent { node 'x86Node1'}
+                    steps {
+                        script {
+                            if (BRANCH_NAME == 'master') {
+                                def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
+                                def image = docker.build("${REPOSITORY}:${tag}-amd64")
+                                image.push()
+                                image.push("latest-amd64")
+                            } else if (BRANCH_NAME == 'develop') {
+                                def image = docker.build("${REPOSITORY}:develop-amd64")
+                                image.push()
+                            }
+                        }
                     }
                 }
-            }
-        }
-        stage('Docker ARM Builds') {
-            when {
-                anyOf {
-                    branch 'master'
-                    branch 'develop'
-                }
-            }
-            agent { node 'CajunARM64'}
-            steps {
-                script {
-                    if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
-                        def armimage = docker.build("${REPOSITORY}:${tag}-arm", "-f Dockerfile.arm .")
-                        def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64 .")
-                        armimage.push()
-                        arm64image.push()
-                        armimage.push("latest-arm")
-                        arm64image.push("latest-arm64")
-                    } else if (BRANCH_NAME == 'develop') {
-                        def armimage = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
-                        def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
-                        armimage.push()
-                        arm64image.push()
+                stage('ARM') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            branch 'develop'
+                        }
+                    }
+                    agent { node 'CajunARM64'}
+                    steps {
+                        script {
+                            if (BRANCH_NAME == 'master') {
+                                def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
+                                def armimage = docker.build("${REPOSITORY}:${tag}-arm", "-f Dockerfile.arm .")
+                                def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64 .")
+                                armimage.push()
+                                arm64image.push()
+                                armimage.push("latest-arm")
+                                arm64image.push("latest-arm64")
+                            } else if (BRANCH_NAME == 'develop') {
+                                def armimage = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
+                                def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
+                                armimage.push()
+                                arm64image.push()
+                            }
+                        }
                     }
                 }
             }
