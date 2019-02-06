@@ -4,7 +4,7 @@ LABEL maintainer="dirtycajunrice"
 
 WORKDIR /app
 
-COPY /ws_counter.py /requirements.txt /README.md /app/
+COPY /requirements.txt /ws_counter.py /app/
 
 RUN python3 -m pip install -r /app/requirements.txt
 
@@ -16,5 +16,5 @@ ENV PLEX_URL localhost:32400
 ENV PLEX_TOKEN xxxxxxxxxxxxxxxx
 
 # Run app.py when the container launches
-CMD ["python", "ws_counter.py"]
+CMD ["python3", "ws_counter.py"]
 
