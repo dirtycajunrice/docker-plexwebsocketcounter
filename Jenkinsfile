@@ -4,6 +4,13 @@ pipeline {
         REPOSITORY = "dirtycajunrice/plexwebsocketcounter"
     }
     stages {
+        stage('Flake8') {
+            agent { node 'x86Node1'}
+            steps {
+                python3 -m venv ouro-venv && ouro-venv/bin/python -m flake8 --max-line-length 120 *.py
+                rm -rf ouro-venv/
+            }
+        }
         stage('Docker Builds') {
             parallel {
                 stage('x86') {
@@ -28,7 +35,7 @@ pipeline {
                         }
                     }
                 }
-                stage('ARM') {
+                stage('ARMv6') {
                     when {
                         anyOf {
                             branch 'master'
@@ -41,15 +48,32 @@ pipeline {
                             if (BRANCH_NAME == 'master') {
                                 def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
                                 def armimage = docker.build("${REPOSITORY}:${tag}-arm", "-f Dockerfile.arm .")
-                                def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64 .")
                                 armimage.push()
-                                arm64image.push()
                                 armimage.push("latest-arm")
-                                arm64image.push("latest-arm64")
                             } else if (BRANCH_NAME == 'develop') {
                                 def armimage = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
-                                def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
                                 armimage.push()
+                            }
+                        }
+                    }
+                }
+                stage('ARM64v8') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            branch 'develop'
+                        }
+                    }
+                    agent { node 'CajunARM64'}
+                    steps {
+                        script {
+                            if (BRANCH_NAME == 'master') {
+                                def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
+                                def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64 .")
+                                arm64image.push()
+                                arm64image.push("latest-arm64")
+                            } else if (BRANCH_NAME == 'develop') {
+                                def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
                                 arm64image.push()
                             }
                         }
