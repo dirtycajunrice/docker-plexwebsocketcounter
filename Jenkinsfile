@@ -115,11 +115,9 @@ pipeline {
             when { branch 'master' }
             agent { label 'amd64'}
             steps {
-                sh '''
-                    git remote set-url origin "https://${GIT_TOKEN_USR}:${GIT_TOKEN_PSW}@github.com/${GIT_REPO}.git" 
-                    git tag "${TAG}"
-                    git push --tags
-                '''
+                script{
+                    sh(script: 'git remote set-url origin "https://${GIT_TOKEN_USR}:${GIT_TOKEN_PSW}@github.com/${GIT_REPO}.git" && git tag ${TAG} && git push --tags')
+                }
             }
         }
     }
