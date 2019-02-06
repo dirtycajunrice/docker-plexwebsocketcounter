@@ -3,6 +3,7 @@ pipeline {
     environment {
         REPOSITORY = "dirtycajunrice/plexwebsocketcounter"
         VERSION_FILE = "ws_counter.py"
+        FLAKE_FILES = "ws_counter.py"
         TAG = ""
     }
     stages {
@@ -10,7 +11,7 @@ pipeline {
             agent { label 'amd64'}
             steps {
                 sh '''
-                    python3 -m venv venv && venv/bin/pip install flake8 && venv/bin/python -m flake8 --max-line-length 120
+                    python3 -m venv venv && venv/bin/pip install flake8 && venv/bin/python -m flake8 --max-line-length 120 ${FLAKE_FILES}
                     rm -rf venv/
                 '''
                 script {
@@ -112,9 +113,9 @@ pipeline {
             when { branch 'master' }
             agent { label 'amd64'}
             steps {
-                script {
-                sh(script: "git tag ${TAG} && git push --tags")
-                }
+                sh '''
+                    git tag ${TAG} && git push --tags
+                '''
             }
         }
     }
