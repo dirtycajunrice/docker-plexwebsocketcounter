@@ -8,7 +8,7 @@ pipeline {
             agent { node 'x86Node1'}
             steps {
                 sh '''
-                    python3 -m venv ouro-venv && ouro-venv/bin/python -m flake8 --max-line-length 120 *.py
+                    python3 -m venv ouro-venv && ouro-venv/bin/pip install flake8 && ouro-venv/bin/python -m flake8 --max-line-length 120 *.py
                     rm -rf ouro-venv/
                 '''
             }
