@@ -112,7 +112,8 @@ pipeline {
             when { branch 'master' }
             agent { label 'amd64'}
             steps {
-                git tag ${TAG} && git push --tags
+                git tag ${TAG}
+                it push --tags
             }
         }
     }
