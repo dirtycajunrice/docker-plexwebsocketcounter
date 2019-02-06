@@ -1,7 +1,8 @@
 pipeline {
     agent none
     environment {
-        REPOSITORY = "dirtycajunrice/plexwebsocketcounter"
+        DOCKER_REPO = "dirtycajunrice/plexwebsocketcounter"
+        GIT_REPO = 'DirtyCajunRice/docker-plexwebsocketcounter'
         VERSION_FILE = "ws_counter.py"
         FLAKE_FILES = "ws_counter.py"
         TAG = ""
@@ -32,11 +33,11 @@ pipeline {
                     steps {
                         script {
                             if (BRANCH_NAME == 'master') {
-                                def image = docker.build("${REPOSITORY}:${TAG}-amd64")
+                                def image = docker.build("${DOCKER_REPO}:${TAG}-amd64")
                                 image.push()
                                 
                             } else if (BRANCH_NAME == 'develop') {
-                                def image = docker.build("${REPOSITORY}:develop-amd64")
+                                def image = docker.build("${DOCKER_REPO}:develop-amd64")
                                 image.push()
                             }
                         }
@@ -53,10 +54,10 @@ pipeline {
                     steps {
                         script {
                             if (BRANCH_NAME == 'master') {
-                                def image = docker.build("${REPOSITORY}:${TAG}-arm", "-f Dockerfile.arm .")
+                                def image = docker.build("${DOCKER_REPO}:${TAG}-arm", "-f Dockerfile.arm .")
                                 image.push()
                             } else if (BRANCH_NAME == 'develop') {
-                                def image = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
+                                def image = docker.build("${DOCKER_REPO}:develop-arm", "-f Dockerfile.arm .")
                                 image.push()
                             }
                         }
@@ -73,10 +74,10 @@ pipeline {
                     steps {
                         script {
                             if (BRANCH_NAME == 'master') {
-                                def image = docker.build("${REPOSITORY}:${TAG}-arm64", "-f Dockerfile.arm64 .")
+                                def image = docker.build("${DOCKER_REPO}:${TAG}-arm64", "-f Dockerfile.arm64 .")
                                 image.push()
                             } else if (BRANCH_NAME == 'develop') {
-                                def image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
+                                def image = docker.build("${DOCKER_REPO}:develop-arm64", "-f Dockerfile.arm64 .")
                                 image.push()
                             }
                         }
@@ -95,16 +96,16 @@ pipeline {
             steps {
                 script {
                     if (BRANCH_NAME == 'master') {
-                        sh(script: "docker manifest create ${REPOSITORY}:${TAG} ${REPOSITORY}:${TAG}-amd64 ${REPOSITORY}:${TAG}-arm64 ${REPOSITORY}:${TAG}-arm")
-                        sh(script: "docker manifest inspect ${REPOSITORY}:${TAG}")
-                        sh(script: "docker manifest push -p ${REPOSITORY}:${TAG}")
-                        sh(script: "docker manifest create ${REPOSITORY}:latest ${REPOSITORY}:${TAG}-amd64 ${REPOSITORY}:${TAG}-arm64 ${REPOSITORY}:${TAG}-arm")
-                        sh(script: "docker manifest inspect ${REPOSITORY}:latest")
-                        sh(script: "docker manifest push -p ${REPOSITORY}:latest")
+                        sh(script: "docker manifest create ${DOCKER_REPO}:${TAG} ${DOCKER_REPO}:${TAG}-amd64 ${DOCKER_REPO}:${TAG}-arm64 ${DOCKER_REPO}:${TAG}-arm")
+                        sh(script: "docker manifest inspect ${DOCKER_REPO}:${TAG}")
+                        sh(script: "docker manifest push -p ${DOCKER_REPO}:${TAG}")
+                        sh(script: "docker manifest create ${DOCKER_REPO}:latest ${DOCKER_REPO}:${TAG}-amd64 ${DOCKER_REPO}:${TAG}-arm64 ${DOCKER_REPO}:${TAG}-arm")
+                        sh(script: "docker manifest inspect ${DOCKER_REPO}:latest")
+                        sh(script: "docker manifest push -p ${DOCKER_REPO}:latest")
                     } else if (BRANCH_NAME == 'develop') {
-                        sh(script: "docker manifest create ${REPOSITORY}:develop ${REPOSITORY}:develop-amd64 ${REPOSITORY}:develop-arm64 ${REPOSITORY}:develop-arm")
-                        sh(script: "docker manifest inspect ${REPOSITORY}:develop")
-                        sh(script: "docker manifest push -p ${REPOSITORY}:develop")
+                        sh(script: "docker manifest create ${DOCKER_REPO}:develop ${DOCKER_REPO}:develop-amd64 ${DOCKER_REPO}:develop-arm64 ${DOCKER_REPO}:develop-arm")
+                        sh(script: "docker manifest inspect ${DOCKER_REPO}:develop")
+                        sh(script: "docker manifest push -p ${DOCKER_REPO}:develop")
                     }
                 }
             }
@@ -112,9 +113,12 @@ pipeline {
         stage('GitHub Release') {
             when { branch 'master' }
             agent { label 'amd64'}
+            environment { GIT_TOKEN = credentials('github-jenkins-token')}
             steps {
                 sh '''
-                    git tag ${TAG} && git push --tags
+                    git remote set-url origin "https://${GIT_TOKEN_USR}:${GIT_TOKEN_PSW}@github.com/${GIT_REPO}.git" 
+                    git tag ${TAG}
+                    git push --tags
                 '''
             }
         }
