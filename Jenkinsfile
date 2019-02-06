@@ -2,53 +2,84 @@ pipeline {
     agent none
     environment {
         REPOSITORY = "dirtycajunrice/plexwebsocketcounter"
+        VERSION_FILE = "ws_counter.py"
+        FLAKE_FILES = "ws_counter.py"
+        TAG = ""
     }
     stages {
-        stage('Docker x86 Build') {
-            when {
-                anyOf {
-                    branch 'master'
-                    branch 'develop'
-                }
-            }
-            agent { node 'x86Node1'}
+        stage('Flake8') {
+            agent { label 'amd64'}
             steps {
+                sh '''
+                    python3 -m venv venv && venv/bin/pip install flake8 && venv/bin/python -m flake8 --max-line-length 120 ${FLAKE_FILES}
+                    rm -rf venv/
+                '''
                 script {
-                    if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
-                        def image = docker.build("${REPOSITORY}:${tag}-amd64")
-                        image.push()
-                        image.push("latest-amd64")
-                    } else if (BRANCH_NAME == 'develop') {
-                        def image = docker.build("${REPOSITORY}:develop-amd64")
-                        image.push()
-                    }
+                    TAG = sh(returnStdout: true, script: 'grep -i version ${VERSION_FILE} | cut -d" " -f3 | tr -d \\"').trim()
                 }
             }
         }
-        stage('Docker ARM Builds') {
-            when {
-                anyOf {
-                    branch 'master'
-                    branch 'develop'
+        stage('Docker Builds') {
+            parallel {
+                stage('amd64') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            branch 'develop'
+                        }
+                    }
+                    agent { label 'amd64'}
+                    steps {
+                        script {
+                            if (BRANCH_NAME == 'master') {
+                                def image = docker.build("${REPOSITORY}:${TAG}-amd64")
+                                image.push()
+                                
+                            } else if (BRANCH_NAME == 'develop') {
+                                def image = docker.build("${REPOSITORY}:develop-amd64")
+                                image.push()
+                            }
+                        }
+                    }
                 }
-            }
-            agent { node 'CajunARM64'}
-            steps {
-                script {
-                    if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
-                        def armimage = docker.build("${REPOSITORY}:${tag}-arm", "-f Dockerfile.arm .")
-                        def arm64image = docker.build("${REPOSITORY}:${tag}-arm64", "-f Dockerfile.arm64 .")
-                        armimage.push()
-                        arm64image.push()
-                        armimage.push("latest-arm")
-                        arm64image.push("latest-arm64")
-                    } else if (BRANCH_NAME == 'develop') {
-                        def armimage = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
-                        def arm64image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
-                        armimage.push()
-                        arm64image.push()
+                stage('ARMv6') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            branch 'develop'
+                        }
+                    }
+                    agent { label 'arm64'}
+                    steps {
+                        script {
+                            if (BRANCH_NAME == 'master') {
+                                def image = docker.build("${REPOSITORY}:${TAG}-arm", "-f Dockerfile.arm .")
+                                image.push()
+                            } else if (BRANCH_NAME == 'develop') {
+                                def image = docker.build("${REPOSITORY}:develop-arm", "-f Dockerfile.arm .")
+                                image.push()
+                            }
+                        }
+                    }
+                }
+                stage('ARM64v8') {
+                    when {
+                        anyOf {
+                            branch 'master'
+                            branch 'develop'
+                        }
+                    }
+                    agent { label 'arm64'}
+                    steps {
+                        script {
+                            if (BRANCH_NAME == 'master') {
+                                def image = docker.build("${REPOSITORY}:${TAG}-arm64", "-f Dockerfile.arm64 .")
+                                image.push()
+                            } else if (BRANCH_NAME == 'develop') {
+                                def image = docker.build("${REPOSITORY}:develop-arm64", "-f Dockerfile.arm64 .")
+                                image.push()
+                            }
+                        }
                     }
                 }
             }
@@ -60,15 +91,14 @@ pipeline {
                     branch 'develop'
                 }
             }
-            agent { node 'x86Node1'}
+            agent { label 'amd64'}
             steps {
                 script {
                     if (BRANCH_NAME == 'master') {
-                        def tag = sh(returnStdout: true, script: 'grep -i version ws_counter.py | cut -d" " -f3 | tr -d \\"').trim()
-                        sh(script: "docker manifest create ${REPOSITORY}:${tag} ${REPOSITORY}:${tag}-amd64 ${REPOSITORY}:${tag}-arm64 ${REPOSITORY}:${tag}-arm")
-                        sh(script: "docker manifest inspect ${REPOSITORY}:${tag}")
-                        sh(script: "docker manifest push -p ${REPOSITORY}:${tag}")
-                        sh(script: "docker manifest create ${REPOSITORY}:latest ${REPOSITORY}:latest-amd64 ${REPOSITORY}:latest-arm64 ${REPOSITORY}:latest-arm")
+                        sh(script: "docker manifest create ${REPOSITORY}:${TAG} ${REPOSITORY}:${TAG}-amd64 ${REPOSITORY}:${TAG}-arm64 ${REPOSITORY}:${TAG}-arm")
+                        sh(script: "docker manifest inspect ${REPOSITORY}:${TAG}")
+                        sh(script: "docker manifest push -p ${REPOSITORY}:${TAG}")
+                        sh(script: "docker manifest create ${REPOSITORY}:latest ${REPOSITORY}:${TAG}-amd64 ${REPOSITORY}:${TAG}-arm64 ${REPOSITORY}:${TAG}-arm")
                         sh(script: "docker manifest inspect ${REPOSITORY}:latest")
                         sh(script: "docker manifest push -p ${REPOSITORY}:latest")
                     } else if (BRANCH_NAME == 'develop') {
@@ -77,6 +107,15 @@ pipeline {
                         sh(script: "docker manifest push -p ${REPOSITORY}:develop")
                     }
                 }
+            }
+        }
+        stage('GitHub Release') {
+            when { branch 'master' }
+            agent { label 'amd64'}
+            steps {
+                sh '''
+                    git tag ${TAG} && git push --tags
+                '''
             }
         }
     }

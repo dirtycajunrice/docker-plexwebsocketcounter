@@ -6,14 +6,14 @@ from influxdb import InfluxDBClient
 from datetime import datetime, timezone
 
 VERSION = "1.1.0"
-vars = os.environ
+envars = os.environ
 
-poll_increment = int(vars['POLL_INCREMENT'])
-plex_ws = 'ws://{}/:/websockets/notifications'.format(vars['PLEX_URL'])
+poll_increment = int(envars['POLL_INCREMENT'])
+plex_ws = 'ws://{}/:/websockets/notifications'.format(envars['PLEX_URL'])
 
 
 class PlexWebSocketReader(Thread):
-    header = ['X-Plex-Token: {token}'.format(token=vars['PLEX_TOKEN'])]
+    header = ['X-Plex-Token: {token}'.format(token=envars['PLEX_TOKEN'])]
 
     def __init__(self):
         Thread.__init__(self)
@@ -29,7 +29,8 @@ class PlexWebSocketReader(Thread):
         print(error)
         self.counter += 1
 
-    def on_close(self):
+    @staticmethod
+    def on_close():
         print("### closed ###")
 
     def run(self):
@@ -41,7 +42,9 @@ class PlexWebSocketReader(Thread):
 
 if __name__ == "__main__":
     reader = PlexWebSocketReader()
-    influx = InfluxDBClient(vars['INFLUXDB_URL'], int(vars['INFLUXDB_PORT']), vars['INFLUXDB_USER'], vars['INFLUXDB_PASSWORD'], vars['INFLUXDB_DBNAME'])
+    influx = InfluxDBClient(envars['INFLUXDB_URL'], int(envars['INFLUXDB_PORT']),
+                            envars['INFLUXDB_USER'], envars['INFLUXDB_PASSWORD'],
+                            envars['INFLUXDB_DBNAME'])
     while True:
         sleep(poll_increment)
         avg_requests_per_second = reader.counter / poll_increment
